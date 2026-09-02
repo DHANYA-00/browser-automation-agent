@@ -1,10 +1,22 @@
 {
-  "name": "playwright_automation_vscodeext",
+  "name": "playwright_automation_linkedin_agent",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {},
-  "keywords": [],
+  "description": "Playwright-based autonomous LinkedIn job search agent",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node tests/test-unit-dedupe.js && node tests/test-filter-jobs.js && node tests/test-dom-extraction.js && node tests/test-retry.js",
+    "login": "node scripts/linkedin-login.js",
+    "search-demo": "node scripts/test-job-search.js",
+    "eval-tasks": "node scripts/test-tasks.js"
+  },
+  "keywords": [
+    "playwright",
+    "automation",
+    "linkedin",
+    "agent",
+    "jobs"
+  ],
   "author": "",
   "license": "ISC",
   "devDependencies": {

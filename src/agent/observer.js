@@ -202,15 +202,18 @@ class Observer {
   }
 
   async observe() {
-    if (this.browser && this.browser.page) {
-      await this.browser.page.waitForLoadState("domcontentloaded", { timeout: 5000 }).catch(() => {});
+    if (this.browser) {
+      await this.browser.ensurePage().catch(() => {});
+      if (this.browser.page && !this.browser.page.isClosed()) {
+        await this.browser.page.waitForLoadState("domcontentloaded", { timeout: 5000 }).catch(() => {});
+      }
     }
 
-    const title = await this.browser.getTitle();
+    const title = await this.browser.getTitle().catch(() => "");
     const url = this.browser.getUrl();
-    const elements = await this.getInteractiveElements();
+    const elements = await this.getInteractiveElements().catch(() => []);
 
-    await this.browser.screenshot("current.png");
+    await this.browser.screenshot("current.png").catch(() => {});
 
     return {
       title,
