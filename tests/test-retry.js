@@ -1,3 +1,4 @@
+const assert = require("assert");
 const Browser = require("../src/browser/browser");
 const Agent = require("../src/agent/agent");
 
@@ -38,8 +39,15 @@ const Agent = require("../src/agent/agent");
     console.log("Retries (Failures):", outcome.retries);
     console.log("History items count:", outcome.history.length);
     console.log("Failed action recorded in history:", outcome.history.some(h => h.action.status === "failed"));
+
+    // Automated assertions
+    assert.strictEqual(outcome.status, "DONE", "Outcome status should be DONE after recovery");
+    assert.strictEqual(outcome.retries, 1, "Should record 1 retry/failure");
+    assert.strictEqual(outcome.history.some(h => h.action.status === "failed"), true, "Failed action must be recorded in history");
+    console.log("✅ ACTION RETRY & FAILURE RECOVERY TEST PASSED PERFECTLY!");
   } catch (err) {
     console.error("❌ Test error:", err);
+    process.exit(1);
   } finally {
     await browser.close();
   }

@@ -1,3 +1,6 @@
+// MANUALLY EXECUTED DEV UTILITY SCRIPT (Not run in automated CI)
+// Usage: node scripts/test-observer.js
+
 const Browser = require("../src/browser/browser");
 const Observer = require("../src/agent/observer");
 

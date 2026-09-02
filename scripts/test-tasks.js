@@ -1,3 +1,6 @@
+// MANUALLY EXECUTED DEV EVALUATION SUITE (Not run in automated CI)
+// Usage: node scripts/test-tasks.js
+
 const Browser = require("../src/browser/browser");
 const Agent = require("../src/agent/agent");
 

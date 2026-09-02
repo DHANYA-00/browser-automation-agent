@@ -7,16 +7,19 @@ const Agent = require("./agent/agent");
   try {
     await browser.launch();
 
-    // Enable mock planner mode if API key is not supplied in environment
-    const options = {
-      plannerOptions: {
-        mockMode: !process.env.OPENAI_API_KEY && !process.env.ANTHROPIC_API_KEY,
-      },
-    };
+    // Ensure authenticated session on LinkedIn before executing agent tasks
+    const authenticated = await browser.loginLinkedIn("data/session.json");
 
-    const agent = new Agent(browser, options);
+    if (authenticated) {
+      const options = {
+        plannerOptions: {
+          mockMode: !process.env.OPENAI_API_KEY && !process.env.ANTHROPIC_API_KEY,
+        },
+      };
 
-    await agent.run("Search for OpenAI on Google and open the first result");
+      const agent = new Agent(browser, options);
+      await agent.run("Search for software engineer jobs on LinkedIn");
+    }
   } catch (error) {
     console.error("❌ Fatal Error:", error);
   } finally {
