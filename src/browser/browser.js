@@ -11,8 +11,9 @@ class Browser {
   }
 
   async launch(options = {}) {
+    const isCI = !!process.env.CI;
     this.browser = await chromium.launch({
-      headless: false,
+      headless: isCI ? true : false,
       ...options,
     });
 
