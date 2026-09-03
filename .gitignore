@@ -142,16 +142,6 @@ tmp-*
 *.tmp-*
 
 
-# --- LOCAL PROJECT OVERRIDES ---
-# Override the default ignore behavior for specific project folders
-!config/
-!config/default.json
-!data/
-!data/*.json
-!tests/
-!tests/*.js
-!tests/*.test.js
-
 
 # --- MISCELLANEOUS IGNORES ---
 # Ignore binary executable files
