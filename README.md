@@ -1,117 +1,97 @@
-# LinkedIn Job Automation Agent
+# AI Browser Operator
 
-An autonomous, Playwright-powered Node.js agent that automates LinkedIn job searching, card extraction, deterministic filtering, screening question matching, account safety protections, and Easy Apply application workflows.
+A browser automation agent built with **Node.js** and **Playwright**. It takes a task written in plain English, looks at the current webpage, decides what to click or type next, does it, and repeats — instead of running a fixed, pre-written script.
 
----
+For example:
 
-## Status & Validation
+```text
+Search for OpenAI on Google
+```
 
-- **Dry-Run Validation**: Completed & Verified. Evaluated pipeline against batch datasets with 100% answer accuracy and zero hallucinated inputs.
-- **Live Testing**: Live-tested with low-cap execution (5 applications), verified against LinkedIn's "My Jobs ➔ Applied" ground truth list.
-- **Current Ongoing Operating Cap**: Default set to **15 applications/day** (`config/default.json`).
+The agent figures out the steps itself by reading the page after every action, rather than following a script written specifically for that task.
 
----
+## Goal
 
-## Key Features
+The long-term goal is to use this agent to automate job applications on LinkedIn — searching for relevant jobs and applying automatically.
 
-- **Observe-Plan-Act Loop**: Autonomous page observation, DOM selector extraction, LLM planning (with intelligent mock mode fallback), and Playwright action execution.
-- **Session Persistence**: Saves and reuses authenticated state (`data/session.json`) to bypass login forms.
-- **Deterministic Filter Engine**: Rule-based job evaluation using inclusion/exclusion keywords, company blacklists, and posting freshness (`config/default.json`).
-- **Easy Apply Modal Handler**: Automates multi-step forms (text, dropdowns, checkboxes, resume upload) with screening lookup table matching (`screeningQuestions`).
-- **Multi-Layer Safety Rails**:
-  - **Daily Application Cap**: Enforces `dailyApplicationCap` (default 15/day).
-  - **Human-like Delays**: Configurable random action delays (3–8s) and job delays (30–90s).
-  - **CAPTCHA & Security Challenge Hard Stop**: Immediate exit on security challenges with emergency screenshot capture (`screenshots/captcha_detected.png`).
-  - **Screening Question Guardrails**: Flags unrecognized questions or essay prompts (`"flagged_for_review"`) instead of guessing.
-- **Review Queue CLI**: Inspect and resolve flagged jobs via `scripts/review-queue.js`.
+Development is being done step by step, starting with a reliable general-purpose browser agent before adding LinkedIn-specific behavior on top of it.
 
----
+## How It Works
 
-## Architecture & Safety Technical Details
+The agent follows an **Observe → Plan → Act → Repeat** loop:
 
-For detailed technical specs, module breakdown, and safety rail implementation, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+1. **Observe** – Look at the current page: title, URL, and every visible button, link, and input field.
+2. **Plan** – Decide the single next action to take based on the task and what's currently on screen.
+3. **Act** – Perform that action, such as clicking, typing, scrolling, or waiting.
+4. **Repeat** – Go back to step 1 until the task is finished or a safety limit is reached.
 
----
+This loop allows the agent to react to what actually happens on the page instead of assuming that a fixed sequence of steps will always work.
 
-## Installation & Setup
+## Project Structure
 
-1. **Install Dependencies**:
-   ```bash
-   npm install
-   npx playwright install chromium
-   ```
+```text
+src/
+  agent/
+    observer.js   # Reads the page and lists what's clickable/typeable
+    planner.js    # Decides the next action to take
+    agent.js      # Runs the observe → plan → act loop
+    memory.js     # Keeps track of past actions
 
-2. **Configure Environment Variables**:
-   ```bash
-   cp .env.example .env
-   ```
+  browser/
+    browser.js    # Playwright wrapper (navigate, click, type, etc.)
+    actions.js    # Fixed list of actions the agent can perform
 
-   **Required Settings**:
-   - `LINKEDIN_EMAIL` / `LINKEDIN_PASSWORD` *(optional if saved session exists)*.
-   - `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` *(optional, runs in mock planner mode if absent)*.
+  index.js        # Entry point
+```
 
----
+## Tech Stack
 
-## Usage & Commands
+* **Node.js**
+* **Playwright** – Browser automation
+* **LLM API** – Used by the planner to decide each next action
 
-### 1. Interactive LinkedIn Login (Initial Setup)
-Generates persistent session state in `data/session.json`:
+## Getting Started
+
+Install the project dependencies:
+
 ```bash
-npm run login
+npm install
 ```
 
-### 2. Review Queue CLI Tool
-Inspect and resolve jobs flagged for human review:
+Install the Chromium browser required by Playwright:
+
 ```bash
-# List all flagged jobs with exact question text & reasons
-node scripts/review-queue.js list
-
-# Resolve a job back to queued status for retry
-node scripts/review-queue.js resolve <jobId>
+npx playwright install chromium
 ```
 
-### 3. Run Pipeline in Dry-Run Mode (Validation)
-Runs complete pipeline with dry-run submission interception:
+Start the agent:
+
 ```bash
-node scripts/run-end-to-end-dryrun.js
+node src/index.js
 ```
 
-### 4. Run Pipeline Live (Production)
-Executes live Easy Apply applications respecting safety rails:
-```bash
-node scripts/run-live-pipeline.js
-```
+The task is configured in `src/index.js`. Change the task text to try a different instruction.
 
----
+## Current Status
 
-## Configuration (`config/default.json`)
+### Working
 
-Key safety and filter parameters:
-```json
-{
-  "dailyApplicationCap": 15,
-  "actionDelayMinMs": 3000,
-  "actionDelayMaxMs": 8000,
-  "jobDelayMinMs": 30000,
-  "jobDelayMaxMs": 90000,
-  "easyApplyOnly": true,
-  "screeningQuestions": {
-    "yearsOfExperience": {
-      "default": 3,
-      "javascript": 3,
-      "node": 3,
-      "react": 3,
-      "typescript": 3,
-      "playwright": 2,
-      "python": 2
-    },
-    "sponsorshipRequired": false,
-    "legallyAuthorized": true,
-    "commuteOrRelocate": true,
-    "educationDegree": "Bachelor's Degree",
-    "noticePeriodDays": 0,
-    "salaryExpectation": "120000",
-    "securityClearance": false
-  }
-}
-```
+* The agent can take a simple task, observe a webpage, and complete it step by step without a hardcoded script.
+* Handles basic actions:
+
+  * Navigating
+  * Clicking
+  * Typing
+  * Scrolling
+  * Waiting for elements to appear
+* Retries automatically if an action fails.
+* Stops safely instead of looping forever.
+
+### In Progress
+
+The following features are being developed as the project moves toward LinkedIn automation:
+
+* Extending the agent to handle longer, multi-step real-world tasks.
+* Adding LinkedIn login and session handling.
+* Adding LinkedIn job search and job listing extraction.
+* Auto-filling job applications through **Easy Apply** will follow once the above functionality is solid.
