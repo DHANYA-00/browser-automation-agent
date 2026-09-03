@@ -253,6 +253,34 @@ class Browser {
     console.log(`⏳ Waited ${ms}ms`);
   }
 
+  async selectOption(selector, option, options = {}) {
+    await this.ensurePage();
+    const timeout = options.timeout || 5000;
+    await this.page.locator(selector).selectOption(option, { timeout, ...options });
+    console.log(`Dropdown selected [${selector}]: ${JSON.stringify(option)}`);
+  }
+
+  async check(selector, options = {}) {
+    await this.ensurePage();
+    const timeout = options.timeout || 5000;
+    await this.page.locator(selector).check({ timeout, ...options });
+    console.log(`☑️ Checked: ${selector}`);
+  }
+
+  async uncheck(selector, options = {}) {
+    await this.ensurePage();
+    const timeout = options.timeout || 5000;
+    await this.page.locator(selector).uncheck({ timeout, ...options });
+    console.log(`☐ Unchecked: ${selector}`);
+  }
+
+  async setInputFiles(selector, files, options = {}) {
+    await this.ensurePage();
+    const timeout = options.timeout || 5000;
+    await this.page.locator(selector).setInputFiles(files, { timeout, ...options });
+    console.log(`📁 Uploaded file(s) [${selector}]: ${JSON.stringify(files)}`);
+  }
+
   async waitForSelector(selector, options = {}) {
     await this.ensurePage();
     const timeout = options.timeout || 5000;

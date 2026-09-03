@@ -2,12 +2,16 @@
 // Usage: node scripts/test-job-search.js
 
 const Browser = require("../src/browser/browser");
-const { buildSearchUrl, extractJobCards, JobStore } = require("../src/linkedin");
+const { buildSearchUrl, extractJobCards, JobStore, loadConfig } = require("../src/linkedin");
 
 (async () => {
   console.log("=================================================");
-  console.log("🔍 LINKEDIN JOB SEARCH & DEDUPE DEMO SCRIPT");
+  console.log("🔍 LINKEDIN JOB SEARCH & FILTER PIPELINE DEMO");
   console.log("=================================================\n");
+
+  // 1. Load config (throws error if missing/invalid)
+  const config = loadConfig();
+  console.log("📋 Filter configuration loaded successfully.");
 
   const SESSION_PATH = "data/session.json";
   const STORAGE_FILE = "data/test_jobs.json";
@@ -22,14 +26,14 @@ const { buildSearchUrl, extractJobCards, JobStore } = require("../src/linkedin")
   };
 
   const targetUrl = buildSearchUrl(searchParams);
-  console.log(`📌 Filter Parameters:`, searchParams);
+  console.log(`📌 Search Parameters:`, searchParams);
   console.log(`🔗 Generated Search URL: ${targetUrl}\n`);
 
   const browser = new Browser();
   try {
     await browser.launch();
 
-    // 1. Authenticate using saved session state
+    // Step 1: Authenticate using saved session state
     console.log("--- Step 1: Authenticating Session ---");
     const authenticated = await browser.loginLinkedIn(SESSION_PATH);
     if (!authenticated) {
@@ -37,48 +41,34 @@ const { buildSearchUrl, extractJobCards, JobStore } = require("../src/linkedin")
       process.exit(1);
     }
 
-    // 2. Navigate to search URL
+    // Step 2: Navigate to search URL
     console.log("\n--- Step 2: Navigating to Search URL ---");
     await browser.goto(targetUrl);
     await browser.randomDelay(2000, 3000);
 
-    // 3. First Extraction Run
-    console.log("\n--- Step 3: Performing First Extraction Run ---");
-    const cardsRun1 = await extractJobCards(browser.page, { maxCards: 20 });
-    console.log(`📦 Cards extracted from DOM in Run 1: ${cardsRun1.length}`);
+    // Step 3: Extraction Run
+    console.log("\n--- Step 3: Performing Job Card Extraction ---");
+    const cards = await extractJobCards(browser.page, { maxCards: 20 });
+    console.log(`📦 Cards extracted from DOM: ${cards.length}`);
 
-    const res1 = store.saveJobs(cardsRun1);
-    console.log("\n💾 Persistence Statistics (Run 1):");
-    console.log(`   • New jobs added:      ${res1.newCount}`);
-    console.log(`   • Already known jobs:  ${res1.existingCount}`);
-    console.log(`   • Total jobs in store: ${res1.totalCount}`);
+    const res = store.saveJobs(cards);
+    console.log("\n💾 Persistence Statistics:");
+    console.log(`   • New jobs added:      ${res.newCount}`);
+    console.log(`   • Already known jobs:  ${res.existingCount}`);
+    console.log(`   • Total jobs in store: ${res.totalCount}`);
 
-    // 4. Second Extraction Run (Testing Deduplication)
-    console.log("\n--- Step 4: Performing Second Extraction Run (Testing Deduplication) ---");
-    const cardsRun2 = await extractJobCards(browser.page, { maxCards: 20 });
-    console.log(`📦 Cards extracted from DOM in Run 2: ${cardsRun2.length}`);
-
-    const res2 = store.saveJobs(cardsRun2);
-    console.log("\n💾 Persistence Statistics (Run 2 - Dedupe Check):");
-    console.log(`   • New jobs added:      ${res2.newCount}`);
-    console.log(`   • Already known jobs:  ${res2.existingCount}`);
-    console.log(`   • Total jobs in store: ${res2.totalCount}`);
-
-    if (res2.newCount === 0 && res2.existingCount === cardsRun2.length) {
-      console.log("\n🎉 DEDUPLICATION VERIFIED SUCCESSFUL!");
-      console.log("   All duplicate jobs were identified and skipped. Existing status was preserved.");
-    } else {
-      console.log(`\nℹ️ Deduplication Summary: ${res2.newCount} new jobs added, ${res2.existingCount} duplicates skipped.`);
-    }
+    // Step 4: Apply Filter Rules using loaded config
+    console.log("\n--- Step 4: Applying Filter Rules from config/default.json ---");
+    const filterResults = store.applyFiltersAndSave(config);
 
     // Print sample extracted job
     const storedJobs = store.getAllJobs();
     if (storedJobs.length > 0) {
-      console.log("\n📄 Sample Structured Job Card Record:");
+      console.log("\n📄 Sample Structured Job Record (After Filtering):");
       console.log(JSON.stringify(storedJobs[0], null, 2));
     }
   } catch (err) {
-    console.error("❌ Test Script Error:", err);
+    console.error("❌ Pipeline Execution Error:", err);
   } finally {
     await browser.close();
   }

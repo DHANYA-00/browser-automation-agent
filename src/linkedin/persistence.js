@@ -40,6 +40,38 @@ class JobStore {
    * @param {string} jobId
    * @returns {Object|null}
    */
+  /**
+   * Retrieves all jobs matching a specific status.
+   * Standard status values: "NEW", "queued", "filtered_out", "applied", "flagged_for_review", "failed".
+   * @param {string} status 
+   * @returns {Array<Object>}
+   */
+  getJobsByStatus(status) {
+    const jobs = this.getAllJobs();
+    return jobs.filter((j) => String(j.status).toLowerCase() === String(status).toLowerCase());
+  }
+
+  /**
+   * Retrieves all queued jobs ready for application.
+   * @returns {Array<Object>}
+   */
+  getQueuedJobs() {
+    return this.getJobsByStatus("queued");
+  }
+
+  /**
+   * Retrieves all jobs with status "flagged_for_review", sorted by most recent first.
+   * @returns {Array<Object>}
+   */
+  getFlaggedJobs() {
+    const flagged = this.getJobsByStatus("flagged_for_review");
+    return flagged.sort((a, b) => {
+      const timeA = new Date(a.flaggedAt || a.updatedAt || a.foundAt || 0).getTime();
+      const timeB = new Date(b.flaggedAt || b.updatedAt || b.foundAt || 0).getTime();
+      return timeB - timeA;
+    });
+  }
+
   getJobById(jobId) {
     const jobs = this.getAllJobs();
     return jobs.find((j) => String(j.id) === String(jobId)) || null;
@@ -76,6 +108,7 @@ class JobStore {
           location: job.location || "",
           postedDate: job.postedDate || "",
           easyApply: Boolean(job.easyApply),
+          url: job.url || `https://www.linkedin.com/jobs/view/${strId}/`,
           foundAt: nowIso,
           status: job.status || "NEW", // Default status for newly discovered jobs
           reason: job.reason || null,
@@ -99,6 +132,22 @@ class JobStore {
   }
 
   /**
+   * Calculates total number of jobs applied today (YYYY-MM-DD).
+   * @returns {number}
+   */
+  getAppliedCountToday() {
+    const jobs = this.getAllJobs();
+    const todayStr = new Date().toISOString().split("T")[0];
+
+    return jobs.filter((j) => {
+      if (String(j.status).toLowerCase() !== "applied") return false;
+      const dateToCheck = j.appliedAt || j.updatedAt || j.foundAt;
+      if (!dateToCheck) return false;
+      return dateToCheck.startsWith(todayStr);
+    }).length;
+  }
+
+  /**
    * Updates status and optional filter reason of an existing job.
    * @param {string} jobId
    * @param {string} status
@@ -111,6 +160,16 @@ class JobStore {
     if (target) {
       target.status = status;
       target.reason = reason;
+      target.updatedAt = new Date().toISOString();
+      if (!target.url) {
+        target.url = `https://www.linkedin.com/jobs/view/${target.id}/`;
+      }
+      if (String(status).toLowerCase() === "applied" && !target.appliedAt) {
+        target.appliedAt = new Date().toISOString();
+      }
+      if (String(status).toLowerCase() === "flagged_for_review") {
+        target.flaggedAt = new Date().toISOString();
+      }
       fs.writeFileSync(this.filePath, JSON.stringify(jobs, null, 2), "utf-8");
       return true;
     }

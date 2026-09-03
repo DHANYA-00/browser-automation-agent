@@ -56,6 +56,28 @@ async function executeAction(browser, action) {
       await browser.forward();
       break;
 
+    case "SELECT":
+      await browser.selectOption(
+        action.selector,
+        action.option || action.value || action.label || action.text
+      );
+      break;
+
+    case "CHECK":
+      await browser.check(action.selector);
+      break;
+
+    case "UNCHECK":
+      await browser.uncheck(action.selector);
+      break;
+
+    case "UPLOAD_FILE":
+      await browser.setInputFiles(
+        action.selector,
+        action.filePath || action.file || action.path
+      );
+      break;
+
     case "DONE":
       return true;
 

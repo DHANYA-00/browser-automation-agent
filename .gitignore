@@ -3,12 +3,9 @@ node_modules/
 /.pnp
 .pnp.js
 
-# Project Folders Ignored
-config/
-data/
-docs/
-
-# Local Persistence & Data (Secrets / Local Database)
+# Local Persistence & Sensitive Data Files
+data/*.json
+!data/.gitkeep
 session.json
 session*.json
 jobs.json
@@ -23,9 +20,7 @@ temp_*.json
 .env.production.local
 *.pem
 
-# Testing & Playwright Output
-tests/
-/tests/
+# Testing & Playwright Runtime Artifacts
 /test-results/
 /playwright-report/
 /blob-report/
@@ -33,12 +28,9 @@ tests/
 /playwright/.auth/
 /.playwright/
 /screenshots/
-*.png
-*.jpeg
-*.jpg
 
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -46,109 +38,6 @@ pnpm-debug.log*
 
 # OS & Editor Files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 .idea/
 .vscode/
-*.suo
-*.ntvsopt
-*.njsproj
-*.sln
-*.sw?
-
-
-# --- BINARY AND PACKAGING ARTIFACTS ---
-# Ignore compiled distributable code
-dist/
-build/
-
-# Ignore local environment runtime artifacts
-.next/
-.nuxt/
-.vite/
-out/
-
-
-# --- DEPENDENCIES ---
-# Dependencies (required)
-node_modules/
-
-
-# --- LOCAL DEVELOPMENT ARTIFACTS ---
-# Editor and IDE metadata
-.vscode/
-.idea/
-*.sublime-project
-*.sublime-workspace
-.history/
-.history-*
-
-
-# --- OPERATING SYSTEM ARTIFACTS ---
-.DS_Store
-Thumbs.db
-
-
-# --- LOCAL WORKSPACE CONFIGURATION ---
-# Ignore user-specific settings and overrides
-.vscode/settings.json
-.vscode/tasks.json
-.vscode/launch.json
-.vscode/extensions.json
-
-
-# --- LOCAL TESTING & DEBUGGING ARTIFACTS ---
-# Ignore generated test reports and debugging outputs
-/test-results/
-/test-output/
-/playwright-report/
-/blob-report/
-/playwright-videos/
-/trace/
-/test-artifacts/
-*.spec.ts
-*.test.ts
-
-
-# --- PLAYWRIGHT DEBUGGING & CACHE ---
-.playwright/
-.playwright/.cache/
-.playwright/.auth/
-.playwright/.deps/
-.playwright/.store/
-.playwright/*.log
-
-
-# --- SCREENSHOTS AND LOGS ---
-# Ignore locally generated screenshots and log files
-/screenshots/
-/logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-pnpm-debug.log*
-
-
-# --- TEMP FILES ---
-# Ignore temporary files
-temp/
-*.tmp
-*.temp
-tmp-*
-*.tmp-*
-
-
-
-# --- MISCELLANEOUS IGNORES ---
-# Ignore binary executable files
-*.exe
-*.app
-*.out
-*.o
-*.dll
-*.dylib
-*.so
