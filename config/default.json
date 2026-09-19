@@ -1,0 +1,56 @@
+{
+  "_lastTuned": {
+    "date": "2026-09-03",
+    "summary": "Tuned screening questions lookup table (added react & typescript experience and securityClearance) and resolved safe flagged jobs back to queued."
+  },
+  "includeKeywords": [
+    "Engineer",
+    "Developer",
+    "Software",
+    "Node",
+    "Frontend",
+    "Backend",
+    "Full Stack"
+  ],
+  "excludeKeywords": [
+    "Senior",
+    "Staffing",
+    "Contract",
+    "Director",
+    "Lead",
+    "VP",
+    "Manager",
+    "Intern"
+  ],
+  "companyBlacklist": [
+    "CyberCoders",
+    "Revature",
+    "Jobot"
+  ],
+  "easyApplyOnly": true,
+  "minPostedWithinDays": 7,
+  "resumePath": "data/resume.pdf",
+  "dailyApplicationCap": 15,
+  "actionDelayMinMs": 3000,
+  "actionDelayMaxMs": 8000,
+  "jobDelayMinMs": 30000,
+  "jobDelayMaxMs": 90000,
+  "screeningQuestions": {
+    "yearsOfExperience": {
+      "default": 3,
+      "javascript": 3,
+      "node": 3,
+      "react": 3,
+      "typescript": 3,
+      "playwright": 2,
+      "python": 2
+    },
+    "sponsorshipRequired": false,
+    "legallyAuthorized": true,
+    "commuteOrRelocate": true,
+    "educationDegree": "Bachelor's Degree",
+    "noticePeriodDays": 0,
+    "salaryExpectation": "120000",
+    "securityClearance": false
+  }
+}

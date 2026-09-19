@@ -1,90 +1,69 @@
-# ==========================================
-# Environment & Secret Credentials
-# ==========================================
+# Node / package manager
+node_modules/
+.npm/
+.pnpm-store/
+
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Environment and secret files
 .env
 .env.*
 !.env.example
+
 *.pem
 *.key
 *.crt
 *.pfx
 *.p12
 
-# ==========================================
-# User Auth & Session Data
-# ==========================================
-session.json
-session*.json
-auth.json
-cookies.json
-storageState.json
-user_data/
-browser_data/
-chrome_profile/
+# Browser session and authentication state
+# These files may contain LinkedIn cookies, auth state, or browser profile data.
+data/session.json
+data/*.session.json
+data/chrome-profile/
+data/browser-profile/
+**/chrome-profile/
+**/user-data/
+**/cookies.sqlite
+**/Login Data
+**/Local State
+**/Cookies
+**/Preferences
 
-# ==========================================
-# Local Persistence & Data Storage
-# ==========================================
-*.sqlite
-*.db
-*.sqlite3
-temp_*.json
-jobs.json
-test_jobs.json
-
-# ==========================================
-# User Ignored Project Folders
-# ==========================================
-data/
-docs/
-tests/
-config/
-
-# ==========================================
-# Node & Dependencies
-# ==========================================
-node_modules/
-/.pnp
-.pnp.js
-
-# ==========================================
-# Playwright & Testing Artifacts
-# ==========================================
-test-results/
+# Generated local project data
+# Keep the sample/test fixtures tracked, but ignore runtime-generated job state.
+data/jobs.json
+data/*.local.json
+downloads/
+screenshots/
 playwright-report/
+test-results/
 blob-report/
+coverage/
+.nyc_output/
+videos/
+traces/
+logs/
+
+# Playwright cache and local auth artifacts
 playwright/.cache/
 playwright/.auth/
 .playwright/
-screenshots/
-videos/
-traces/
-downloads/
-coverage/
-.nyc_output/
 
-# ==========================================
-# Logs & Temporary Files
-# ==========================================
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-pnpm-debug.log*
-lerna-debug.log*
+# Temporary and cache files
 tmp/
 temp/
 *.tmp
+*.log
 .cache/
 
-# ==========================================
-# OS & Editor Files
-# ==========================================
+# Editor / OS metadata
+.vscode/
+.idea/
 .DS_Store
 Thumbs.db
-.idea/
-.vscode/
 *.swp
 *.swo
 *~
-.eslintcache

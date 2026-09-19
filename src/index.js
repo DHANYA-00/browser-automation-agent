@@ -17,8 +17,9 @@ const Agent = require("./agent/agent");
         },
       };
 
-      const agent = new Agent(browser, options);
-      await agent.run("Search for software engineer jobs on LinkedIn");
+      const { runJobSearchBatches } = require("./linkedin/batch-runner");
+      await runJobSearchBatches(browser);
+      await browser.searchLinkedIn("Software Engineer");
     }
   } catch (error) {
     console.error("❌ Fatal Error:", error);

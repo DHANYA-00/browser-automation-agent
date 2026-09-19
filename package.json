@@ -5,10 +5,12 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "test": "node tests/test-unit-dedupe.js && node tests/test-filter-jobs.js && node tests/test-dom-extraction.js && node tests/test-retry.js",
+    "test": "node tests/test-unit-dedupe.js && node tests/test-filter-jobs.js && node tests/test-dom-extraction.js && node tests/test-retry.js && node tests/test-persistent-browser.js",
     "login": "node scripts/linkedin-login.js",
     "search-demo": "node scripts/test-job-search.js",
-    "eval-tasks": "node scripts/test-tasks.js"
+    "eval-tasks": "node scripts/test-tasks.js",
+    "chrome:debug": "google-chrome --remote-debugging-port=9222",
+    "chrome:dhanya": "node scripts/launch-dhanya-chrome.js"
   },
   "keywords": [
     "playwright",

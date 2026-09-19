@@ -1,0 +1,24 @@
+[
+  {
+    "id": "4001",
+    "title": "Frontend Developer",
+    "company": "TechCorp",
+    "location": "Remote",
+    "postedDate": "1d ago",
+    "easyApply": true,
+    "foundAt": "2026-09-03T09:00:14.365Z",
+    "status": "applied",
+    "reason": "Applied (Dry Run Mode)"
+  },
+  {
+    "id": "4002",
+    "title": "Full Stack Engineer",
+    "company": "ComplexCorp",
+    "location": "San Francisco",
+    "postedDate": "2d ago",
+    "easyApply": true,
+    "foundAt": "2026-09-03T09:00:14.365Z",
+    "status": "flagged_for_review",
+    "reason": "Unrecognized screening question: \"Security clearance level?\""
+  }
+]

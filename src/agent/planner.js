@@ -12,6 +12,7 @@ const VALID_ACTION_TYPES = [
   "RELOAD",
   "BACK",
   "FORWARD",
+  "LINKEDIN_JOB_SEARCH",
   "DONE",
 ];
 
@@ -52,12 +53,90 @@ Return ONLY a single valid JSON object matching ONE of these action schemas:
 11. RELOAD: { "type": "RELOAD" }
 12. BACK: { "type": "BACK" }
 13. FORWARD: { "type": "FORWARD" }
-14. DONE: { "type": "DONE", "reason": "<explanation_of_how_task_was_completed>" }
+14. LINKEDIN_JOB_SEARCH: { "type": "LINKEDIN_JOB_SEARCH", "keywords": "<keywords>", "location": "<location>", "jobType": "<jobType>" }
+15. DONE: { "type": "DONE", "reason": "<explanation_of_how_task_was_completed>" }
 
 RULES:
 - Choose selectors directly from the current interactive elements list provided in the observation whenever possible.
+- Prefer semantic selectors like role, text, aria-label, placeholder, name, and accessible labels rather than brittle CSS classes.
 - Review recent action history carefully. If an action in history failed (status: 'failed' or has an error message), DO NOT repeat the exact same selector/action. Select an alternative element or try a different approach.
 - Return ONLY strict raw JSON. Do NOT wrap in markdown code blocks like \`\`\`json. Do NOT output extra text or explanations outside JSON.`;
+  }
+
+  buildLinkedInJobSearchPlan(task) {
+    const normalizedTask = (task || "").toLowerCase();
+    const searchTerm = "software developer";
+
+    if (
+      normalizedTask.includes("linkedin") &&
+      normalizedTask.includes("job") &&
+      normalizedTask.includes(searchTerm)
+    ) {
+      return [
+        { type: "NAVIGATE", url: "https://www.linkedin.com/jobs/" },
+        {
+          type: "WAIT_FOR_SELECTOR",
+          selector: "input[role='combobox'][aria-label*='Search jobs' i], input[placeholder*='Search jobs' i], input[aria-label*='Keyword' i], input[name='keywords']",
+        },
+        {
+          type: "TYPE",
+          selector: "input[role='combobox'][aria-label*='Search jobs' i], input[placeholder*='Search jobs' i], input[aria-label*='Keyword' i], input[name='keywords']",
+          text: "Software Developer",
+        },
+        { type: "PRESS", key: "Enter" },
+        { type: "WAIT", ms: 3000 },
+        {
+          type: "DONE",
+          reason: "LinkedIn job search launched and results have been observed.",
+        },
+      ];
+    }
+
+    return null;
+  }
+
+  getNextActionFromPlan(task, observation, history = []) {
+    const plan = this.buildLinkedInJobSearchPlan(task);
+    if (!plan) {
+      return null;
+    }
+
+    const lastAction = history[history.length - 1];
+    const url = observation.url || "";
+
+    if (!url || url === "about:blank") {
+      return plan[0];
+    }
+
+    if (!url.includes("linkedin.com/jobs")) {
+      return plan[0];
+    }
+
+    if (!lastAction || lastAction.type === "NAVIGATE") {
+      return plan[1];
+    }
+
+    if (lastAction.type === "WAIT_FOR_SELECTOR") {
+      return plan[2];
+    }
+
+    if (lastAction.type === "TYPE") {
+      return plan[3];
+    }
+
+    if (lastAction.type === "PRESS") {
+      return plan[4];
+    }
+
+    if (lastAction.type === "WAIT") {
+      return plan[5];
+    }
+
+    if (lastAction.type === "DONE") {
+      return plan[5];
+    }
+
+    return plan[5];
   }
 
   buildUserPrompt(task, observation, history) {
@@ -75,6 +154,9 @@ RULES:
         current_observation: {
           title: observation.title || "",
           url: observation.url || "",
+          visibleText: observation.visibleText || "",
+          jobs: observation.jobs || [],
+          currentPageState: observation.currentPageState || {},
           interactive_elements_count: formattedElements.length,
           interactive_elements: formattedElements,
         },
@@ -86,6 +168,11 @@ RULES:
   }
 
   async getNextAction(task, observation, history = []) {
+    const plannedAction = this.getNextActionFromPlan(task, observation, history);
+    if (plannedAction) {
+      return plannedAction;
+    }
+
     const systemPrompt = this.buildSystemPrompt();
     const userPrompt = this.buildUserPrompt(task, observation, history);
 
@@ -234,6 +321,20 @@ RULES:
           throw new Error(`${type} action requires a string 'selector' field.`);
         }
         break;
+      case "LINKEDIN_JOB_SEARCH":
+        if (
+          !action.keywords ||
+          typeof action.keywords !== "string" ||
+          !action.location ||
+          typeof action.location !== "string" ||
+          !action.jobType ||
+          typeof action.jobType !== "string"
+        ) {
+          throw new Error(
+            "LINKEDIN_JOB_SEARCH action requires string 'keywords', 'location', and 'jobType' fields."
+          );
+        }
+        break;
     }
 
     return action;
@@ -244,7 +345,13 @@ RULES:
     const url = observation.url || "";
     const lowerTask = task.toLowerCase();
 
-    // Task 1: Search OpenAI on Google
+    if (lowerTask.includes("software developer") && lowerTask.includes("linkedin")) {
+      return this.getNextActionFromPlan(task, observation, history) || {
+        type: "DONE",
+        reason: "LinkedIn Software Developer job search task complete.",
+      };
+    }
+
     if (lowerTask.includes("openai") && lowerTask.includes("google")) {
       if (!url || url === "about:blank") {
         return { type: "NAVIGATE", url: "https://www.google.com" };
@@ -283,7 +390,6 @@ RULES:
       }
     }
 
-    // Task 2: Wikipedia Playwright (software)
     if (lowerTask.includes("wikipedia") && lowerTask.includes("playwright")) {
       if (!url || url === "about:blank") {
         return { type: "NAVIGATE", url: "https://en.wikipedia.org/wiki/Main_Page" };
@@ -310,7 +416,6 @@ RULES:
       }
     }
 
-    // Task 3: Wikipedia Node.js scroll to History
     if (lowerTask.includes("wikipedia") && lowerTask.includes("node.js")) {
       if (!url || url === "about:blank") {
         return { type: "NAVIGATE", url: "https://en.wikipedia.org/wiki/Node.js" };
@@ -331,7 +436,6 @@ RULES:
       }
     }
 
-    // Task 4: Hacker News top story
     if (lowerTask.includes("news.ycombinator.com")) {
       if (!url || url === "about:blank") {
         return { type: "NAVIGATE", url: "https://news.ycombinator.com" };
@@ -339,7 +443,7 @@ RULES:
       if (url.includes("ycombinator.com")) {
         if (!lastAction || lastAction.type === "NAVIGATE") {
           const topStory = (observation.elements || []).find(
-            (el) => el.tag === "a" && el.selector.includes("span > a") || el.selector.includes("titleline")
+            (el) => (el.tag === "a" && el.selector.includes("span > a")) || el.selector.includes("titleline")
           );
           return {
             type: "CLICK",

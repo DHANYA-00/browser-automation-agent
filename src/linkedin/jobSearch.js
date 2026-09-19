@@ -211,7 +211,19 @@ async function extractJobCards(page, options = {}) {
   return finalCards;
 }
 
+async function runJobSearch(browser, keywords, location, jobType) {
+  const searchUrl = buildSearchUrl({
+    keywords,
+    location,
+    easyApplyOnly: jobType === "internship",
+  });
+
+  await browser.goto(searchUrl);
+  const jobs = await browser.extractJobCards();
+  console.log(jobs);
+}
 module.exports = {
   buildSearchUrl,
   extractJobCards,
+  runJobSearch,
 };
